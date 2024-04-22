@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>원 클릭 게임</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+    #game-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .circle {
+        position: absolute;
+        cursor: pointer;
+        border-radius: 50%;
+        background-color: #007bff;
+        width: 50px;
+        height: 50px;
+    }
+    #score {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+    }
+    #timer {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        font-size: 24px;
+    }
+    #game-window {
+        width: 70%;
+        height: 70%;
+        position: absolute;
+        left: 15%;
+        top: 15%;
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+</style>
+</head>
+<body>
+<div id="game-window">
+    <div id="game-container"></div>
+</div>
+<div id="score">Score: <span id="score-value">0</span></div>
+<div id="timer">Time: <span id="timer-value">60</span></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const gameContainer = document.getElementById('game-container');
+    const scoreElement = document.getElementById('score-value');
+    const timerElement = document.getElementById('timer-value');
+    let score = 0; // 초기 점수
+    let timeLeft = 60; // 제한 시간 (초)
+    let gameTimer; // 게임 타이머
+
+    // 클릭할 때마다 원을 삭제하고 점수를 올리는 함수
+    function removeCircle(event) {
+        event.target.remove();
+        score++;
+        scoreElement.textContent = score;
+    }
+
+    // 원을 생성하고 랜덤 위치에 배치하는 함수
+    function createCircle() {
+        const circle = document.createElement('div');
+        circle.classList.add('circle');
+        
+        // 원의 크기 설정
+        const size = Math.floor(Math.random() * (100 - 20 + 1)) + 20; // 크기는 20에서 100 사이로 랜덤
+        circle.style.width = `${size}px`;
+        circle.style.height = `${size}px`;
+        
+        // 랜덤 위치 설정 (게임 창 내에서)
+        const x = Math.random() * (gameContainer.clientWidth - size);
+        const y = Math.random() * (gameContainer.clientHeight - size);
+        circle.style.left = `${x}px`;
+        circle.style.top = `${y}px`;
+        
+        // 클릭 이벤트 추가
+        circle.addEventListener('click', removeCircle);
+        
+        // 게임 컨테이너에 원 추가
+        gameContainer.appendChild(circle);
+
+        // 일정 시간이 지난 후 원 삭제
+        setTimeout(function() {
+            circle.remove();
+        }, 600);
+    }
+
+    // 게임 타이머 시작
+    function startTimer() {
+        gameTimer = setInterval(function() {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+
+            if (timeLeft === 0) {
+                clearInterval(gameTimer);
+                endGame();
+            }
+        }, 1000);
+    }
+
+    // 게임 종료 처리
+    function endGame() {
+        alert(`게임 종료! 당신의 점수는 ${score}점 입니다.`);
+        // 확인 버튼 클릭 시 메인 페이지로 이동
+        if (confirm("메인 페이지로 이동하시겠습니까?")) {
+            window.location.href = "home.html"; // 이동할 메인 페이지의 URL을 입력하세요.
+        }
+    }
+
+    // 게임 시작
+    startTimer();
+    // 매 초마다 원을 생성하는 함수 호출
+    setInterval(createCircle, 500);
+});
+</script>
+</body>
+</html>

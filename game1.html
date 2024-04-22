@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>미사일 피하기 게임</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+
+    #backButton {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: #0095DD;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script src="game.js"></script>
+  <button onclick="backToMain()">Back to Main</button>
+
+</body>
+
+</html>
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const context = canvas.getContext('2d');
+
+  let gameOver = false;
+  let score = 0;
+  let time = 0;
+  let player = {
+    x: canvas.width / 2,
+    y: canvas.height - 50,
+    radius: 20
+  };
+  let missileImage = new Image(); // 탄막 이미지 생성
+  missileImage.src = 'missile.png'; // 탄막 이미지 설정
+  let missiles = [];
+
+  document.addEventListener('keydown', function (event) {
+    if (event.code === 'Escape') {
+      gameOver = true;
+    }
+  });
+
+  canvas.addEventListener('mousemove', function (event) {
+    if (!gameOver) {
+      player.x = event.clientX - canvas.offsetLeft;
+    }
+  });
+
+  // 게임 루프
+  function gameLoop() {
+    // 게임 종료 시 게임 루프 중지
+    if (gameOver) {
+      return;
+    }
+
+    // 게임 상태 업데이트
+    time++;
+    if (time % 50 === 0) {
+      missiles.push({
+        x: Math.random() * canvas.width,
+        y: 0,
+        radius: 10,
+        speed: 5 + time / 500
+      });
+    }
+    for (let i = 0; i < missiles.length; i++) {
+      missiles[i].y += missiles[i].speed;
+      if (missiles[i].y > canvas.height) {
+        missiles.splice(i, 1);
+        i--;
+      } else {
+        let distance = Math.sqrt(Math.pow(player.x - missiles[i].x, 2) + Math.pow(player.y - missiles[i].y, 2));
+        // 충돌 검사
+        if (distance < player.radius + missiles[i].radius) {
+          gameOver = true;
+        }
+      }
+    }
+    score++;
+
+    // 게임 화면 그리기
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.beginPath();
+    context.arc(player.x, player.y, player.radius, 0, 2 * Math.PI);
+    context.fillStyle = 'blue';
+    context.fill();
+    for (let i = 0; i < missiles.length; i++) {
+      context.drawImage(missileImage, missiles[i].x - missiles[i].radius, missiles[i].y - missiles[i].radius, missiles[i].radius * 2, missiles[i].radius * 2); // 이미지로 탄막 그리기
+    }
+    context.fillStyle = 'black';
+    context.font = '24px Arial';
+    context.fillText('Score: ' + score, 10, 30);
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // 게임 루프 시작
+  requestAnimationFrame(gameLoop);
+
+  function backToMain() {
+    window.location.href = "home.html"; //메인페이지 가는 버튼
+  }
+
+  const backButton = doucment.getElementById('backButton');
+  backButton.addEventListener('click', backToMain);
+</script>
